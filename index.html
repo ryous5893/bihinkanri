@@ -22,9 +22,9 @@
   <script defer src="js/app.js"></script>
 </head>
 <body>
-  <header class="page-header"><div class="header-inner"><span class="app-mark" aria-hidden="true">備</span><h1>備品貸出管理</h1><nav class="page-nav" aria-label="メインナビゲーション"><a href="index.html" aria-current="page">一覧・備品管理</a><a href="reservation.html">予約・貸出の登録</a></nav></div></header>
+  <header class="page-header"><div class="header-inner"><span class="app-mark" aria-hidden="true">備</span><h1>備品貸出管理</h1><nav class="page-nav" aria-label="メインナビゲーション"><a href="index.html" aria-current="page">一覧・備品管理</a><a id="new-reservation" class="button button-primary" href="reservation.html">予約・貸出を登録する</a></nav></div></header>
   <main>
-    <div class="page-toolbar"><div><p class="eyebrow">備品の利用状況</p><h2>一覧・備品管理</h2><p class="section-description">誰が借りているかの確認と、貸出・返却の操作はこちら。</p></div><a id="new-reservation" class="button button-primary" href="reservation.html">予約・貸出を登録する</a></div>
+    <div class="page-toolbar"><div><p class="eyebrow">備品の利用状況</p><h2>一覧・備品管理</h2><p class="section-description">誰が借りているかの確認と、貸出・返却の操作はこちら。</p></div></div>
     <div id="message" class="message" role="status" aria-live="polite" hidden></div>
     <div id="overdue-summary" class="message message-error" role="status" hidden></div>
     <section class="panel report-panel" aria-labelledby="report-title">
@@ -32,7 +32,7 @@
       <div class="summary-grid"><div>登録備品<strong id="stat-equipment">0</strong></div><div>予約中<strong id="stat-reserved">0</strong></div><div>貸出中<strong id="stat-borrowed">0</strong></div><div>返却済<strong id="stat-returned">0</strong></div></div>
     </section>
     <section class="panel list-panel" aria-labelledby="list-title">
-      <div class="search-toolbar"><label for="list-search">備品・利用者を検索</label><div class="search-controls"><input id="list-search" type="search" placeholder="備品名や借りている人の名前" aria-describedby="search-help"><button id="clear-search" class="button button-secondary" type="button">クリア</button></div><p id="search-help" class="form-note">状態タブごとに絞り込みます。貸出中の利用者は「貸出中」タブで確認できます。</p></div>
+      <div class="search-toolbar"><div class="search-controls"><div class="search-field"><label for="equipment-search">備品名で検索</label><input id="equipment-search" type="search" placeholder="例：ノートPC" aria-describedby="search-help"></div><div class="search-field"><label for="borrower-search">利用者名で検索</label><input id="borrower-search" type="search" placeholder="例：山田 太郎" aria-describedby="search-help"></div><button id="clear-search" class="button button-secondary" type="button">検索をクリア</button></div><p id="search-help" class="form-note">両方入力すると、両方の条件に一致するものを表示します。現在の利用者は「貸出中」タブで確認できます。</p></div>
       <div class="status-tabs" role="tablist" aria-label="貸出・予約の状況">
         <button id="tab-reserved" class="status-tab" type="button" role="tab" data-status="reserved" aria-controls="loan-panel" aria-selected="true">予約中 <span id="count-reserved" class="tab-count">0</span></button>
         <button id="tab-borrowed" class="status-tab" type="button" role="tab" data-status="borrowed" aria-controls="loan-panel" aria-selected="false" tabindex="-1">貸出中 <span id="count-borrowed" class="tab-count">0</span></button>

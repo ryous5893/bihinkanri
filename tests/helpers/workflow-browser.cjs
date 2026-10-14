@@ -102,6 +102,7 @@ module.exports = async function verifyWorkflow({ evaluate, settle, navigate, rel
   await click(`${row('PC-01')}.querySelector('[data-action=return]')`);
   const returnedAt = await evaluate(`EquipmentLoans.createItemRepository(EquipmentLoans.createStorageService()).getAllItems().then(items => items.find(item => item.itemName === 'PC-01' && item.status === 'returned').returnedAt)`);
   assert.ok(Date.parse(returnedAt) >= before && Date.parse(returnedAt) <= Date.now());
+  await click("document.getElementById('tab-returned')");
   assert.match(await evaluate(`${row('PC-01')}.cells[5].textContent`), /\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}/);
   await reload();
   assert.equal(await evaluate(`${row('PC-01')}.cells[4].textContent`), '返却済み');

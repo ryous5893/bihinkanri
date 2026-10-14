@@ -43,7 +43,7 @@ module.exports = async function verifyTabs({ evaluate, navigate, reload, settle 
   assert.equal(await evaluate('document.activeElement.id'), 'tab-returned');
   await evaluate("document.getElementById('tab-returned').dispatchEvent(new KeyboardEvent('keydown', {key:'Home', bubbles:true}))");
   assert.equal(await evaluate('document.activeElement.id'), 'tab-reserved');
-  // 貸出・返却後は移動先のタブに切り替わり、件数も更新される。
+  // 貸出後は貸出中へ移動し、返却後も貸出中を維持して続けて返却できる。
   await evaluate("document.querySelector('#item-list [data-action=start]').click()");
   await settle();
   assert.equal(await evaluate("document.querySelector('[role=tab][aria-selected=true]').dataset.status"), 'borrowed');
@@ -51,8 +51,14 @@ module.exports = async function verifyTabs({ evaluate, navigate, reload, settle 
   assert.equal(await evaluate("document.getElementById('count-borrowed').textContent"), '2');
   await evaluate("document.querySelector('#item-list [data-action=return]').click()");
   await settle();
-  assert.equal(await evaluate("document.querySelector('[role=tab][aria-selected=true]').dataset.status"), 'returned');
+  assert.equal(await evaluate("document.querySelector('[role=tab][aria-selected=true]').dataset.status"), 'borrowed');
   assert.equal(await evaluate("document.getElementById('count-returned').textContent"), '2');
+  await evaluate("document.querySelector('#item-list [data-action=return]').click()");
+  await settle();
+  assert.equal(await evaluate("document.querySelector('[role=tab][aria-selected=true]').dataset.status"), 'borrowed');
+  assert.equal(await evaluate("document.getElementById('count-borrowed').textContent"), '0');
+  assert.equal(await evaluate("document.getElementById('count-returned').textContent"), '3');
+  await select('returned');
   const returnedDates = await evaluate("Array.from(document.querySelectorAll('#item-list tr')).map(row => row.cells[5].textContent)");
   assert.equal(returnedDates[0] >= returnedDates[1], true);
   await select('reserved');

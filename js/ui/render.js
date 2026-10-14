@@ -22,10 +22,10 @@
     borrowed: { label: "貸出中", description: "期限超過を先頭に、返却予定日の近い順に表示します。翌朝10時までは猶予があります。", empty: "予約中の備品で「貸出する」を押すと、ここに表示されます。" },
     returned: { label: "返却済", description: "返却した日時が新しい順に表示します。", empty: "備品を返却すると、返却日時と一緒にここに記録されます。" },
   };
-  app.renderItemList = (items, now = new Date(), status = app.ITEM_STATUS.RESERVED, query = "", selected = new Set()) => {
+  app.renderItemList = (items, now = new Date(), status = app.ITEM_STATUS.RESERVED, filters = {}, selected = new Set()) => {
     const today = app.toLocalDate(now);
     const rows = document.createDocumentFragment();
-    const matching = items.filter((item) => app.matchesSearch(query, item.itemName, item.borrowerName));
+    const matching = items.filter((item) => app.matchesSearch(filters.equipment || "", item.itemName) && app.matchesSearch(filters.borrower || "", item.borrowerName));
     const ordered = matching.filter((item) => item.status === status).sort((left, right) => {
       if (status === app.ITEM_STATUS.RETURNED) return Date.parse(right.returnedAt) - Date.parse(left.returnedAt);
       const overdueOrder = Number(app.isOverdue(right, now)) - Number(app.isOverdue(left, now));
@@ -94,8 +94,8 @@
     const view = views[status];
     document.getElementById("list-title").textContent = `${view.label}の備品`;
     document.getElementById("list-description").textContent = view.description;
-    document.getElementById("empty-title").textContent = query.trim() ? "検索条件に一致する備品はありません" : `${view.label}の備品はありません`;
-    document.getElementById("empty-description").textContent = query.trim() ? "検索語を変更するか、クリアして確認してください。ほかの状態タブも確認できます。" : view.empty;
+    document.getElementById("empty-title").textContent = (filters.equipment?.trim() || filters.borrower?.trim()) ? "検索条件に一致する備品はありません" : `${view.label}の備品はありません`;
+    document.getElementById("empty-description").textContent = (filters.equipment?.trim() || filters.borrower?.trim()) ? "検索語を変更するか、クリアして確認してください。ほかの状態タブも確認できます。" : view.empty;
     document.getElementById("batch-loan-toolbar").hidden = status !== app.ITEM_STATUS.RESERVED;
     document.getElementById("loan-table").dataset.status = status;
     document.getElementById("returned-at-heading").hidden = status !== app.ITEM_STATUS.RETURNED;
@@ -113,9 +113,9 @@
       return row;
     }));
   };
-  app.renderEquipment = (equipment, items = [], query = "") => {
+  app.renderEquipment = (equipment, items = [], filters = {}) => {
     const list = document.getElementById("equipment-list");
-    const matches = equipment.filter((entry) => app.matchesSearch(query, entry.name, ...items.filter((item) => item.equipmentId === entry.id && item.status === app.ITEM_STATUS.BORROWED).map((item) => item.borrowerName)));
+    const matches = equipment.filter((entry) => app.matchesSearch(filters.equipment || "", entry.name) && app.matchesSearch(filters.borrower || "", ...items.filter((item) => item.equipmentId === entry.id && item.status === app.ITEM_STATUS.BORROWED).map((item) => item.borrowerName)));
     const names = matches.map((item) => {
       const entry = document.createElement("li");
       const borrowers = items.filter((record) => record.equipmentId === item.id && record.status === app.ITEM_STATUS.BORROWED);

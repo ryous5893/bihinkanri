@@ -82,7 +82,6 @@
       const item = await action.run(element.dataset.itemId);
       await refresh();
       if (element.dataset.action === "start") tabs.select(app.ITEM_STATUS.BORROWED);
-      if (element.dataset.action === "return") tabs.select(app.ITEM_STATUS.RETURNED);
       app.showMessage(`${item.itemName}の${action.message}`);
     });
   });

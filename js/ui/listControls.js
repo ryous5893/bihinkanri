@@ -2,7 +2,8 @@
 (() => {
   const app = window.EquipmentLoans;
   app.createListControls = ({ repository, equipmentRepository, refresh, run, ready, tabs }) => {
-    const search = document.getElementById("list-search");
+    const equipmentSearch = document.getElementById("equipment-search");
+    const borrowerSearch = document.getElementById("borrower-search");
     const selected = new Set();
     const all = document.getElementById("select-all-reservations");
     const start = document.getElementById("start-selected");
@@ -19,12 +20,13 @@
       document.getElementById("export-csv").disabled = !ready();
     }
     function render() {
-      app.renderItemList(items, new Date(), tabs().getSelected(), search.value, selected);
-      app.renderEquipment(equipment, items, search.value);
+      const filters = { equipment: equipmentSearch.value, borrower: borrowerSearch.value };
+      app.renderItemList(items, new Date(), tabs().getSelected(), filters, selected);
+      app.renderEquipment(equipment, items, filters);
       sync();
     }
-    search.addEventListener("input", () => { selected.clear(); render(); });
-    document.getElementById("clear-search").addEventListener("click", () => { search.value = ""; selected.clear(); render(); search.focus(); });
+    for (const search of [equipmentSearch, borrowerSearch]) search.addEventListener("input", () => { selected.clear(); render(); });
+    document.getElementById("clear-search").addEventListener("click", () => { equipmentSearch.value = borrowerSearch.value = ""; selected.clear(); render(); equipmentSearch.focus(); });
     document.getElementById("item-list").addEventListener("change", (event) => {
       if (!event.target.matches("[data-reservation-id]")) return;
       const id = event.target.dataset.reservationId;

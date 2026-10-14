@@ -179,3 +179,8 @@ th { background: #eaf0f6; color: #334e65; font-weight: 700; }
 .form-section legend { padding: 0 10px; color: #234e73; font-weight: 700; font-size: 15px; }
 .form-section .field:last-child { margin-bottom: 0; }
 @media (max-width: 720px) { .form-section { padding: 14px; } }
+.search-controls { align-items: flex-end; }
+.search-field { flex: 1; min-width: 0; }
+.page-nav .button-primary { background: var(--brand); color: #fff; border-color: #70b9a9; }
+.page-nav .button-primary:hover { background: #0b4943; }
+@media (max-width: 720px) { .search-controls { flex-direction: column; align-items: stretch; } }

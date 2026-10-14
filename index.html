@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一覧 | 備品貸出管理</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script defer src="js/constants.js"></script>
+  <script defer src="js/utils/dates.js"></script>
+  <script defer src="js/utils/validation.js"></script>
+  <script defer src="js/models/item.js"></script>
+  <script defer src="js/models/loanRules.js"></script>
+  <script defer src="js/services/storage.js"></script>
+  <script defer src="js/repositories/loanData.js"></script>
+  <script defer src="js/repositories/equipmentRepository.js"></script>
+  <script defer src="js/repositories/itemRepository.js"></script>
+  <script defer src="js/ui/render.js"></script>
+  <script defer src="js/ui/tabs.js"></script>
+  <script defer src="js/ui/messages.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <header class="page-header"><div class="header-inner"><span class="app-mark" aria-hidden="true">備</span><h1>備品貸出管理</h1></div></header>
+  <main>
+    <div class="page-toolbar"><p class="intro">予約・貸出・返却の状況を確認できます。</p><a id="new-reservation" class="button button-primary" href="reservation.html">予約・貸出を登録する</a></div>
+    <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+    <div id="overdue-summary" class="message message-error" role="status" hidden></div>
+    <section class="panel list-panel" aria-labelledby="list-title">
+      <div class="status-tabs" role="tablist" aria-label="貸出・予約の状況">
+        <button id="tab-reserved" class="status-tab" type="button" role="tab" data-status="reserved" aria-controls="loan-panel" aria-selected="true">予約中 <span id="count-reserved" class="tab-count">0</span></button>
+        <button id="tab-borrowed" class="status-tab" type="button" role="tab" data-status="borrowed" aria-controls="loan-panel" aria-selected="false" tabindex="-1">貸出中 <span id="count-borrowed" class="tab-count">0</span></button>
+        <button id="tab-returned" class="status-tab" type="button" role="tab" data-status="returned" aria-controls="loan-panel" aria-selected="false" tabindex="-1">返却済 <span id="count-returned" class="tab-count">0</span></button>
+      </div>
+      <div id="loan-panel" role="tabpanel" aria-labelledby="tab-reserved" tabindex="0">
+      <div class="list-heading"><div><h2 id="list-title">予約中の備品</h2><p id="list-description" class="section-description">利用開始日の近い予約から表示します。</p></div><span id="item-count" class="count">0件</span></div>
+      <div id="empty-state" class="empty-state"><div class="empty-icon" aria-hidden="true">□</div><h3 id="empty-title">予約中の備品はありません</h3><p id="empty-description">「予約・貸出を登録する」から新しい予約を登録できます。</p></div>
+      <div id="table-container" class="table-container" hidden>
+        <table id="loan-table" class="list-table"><caption class="visually-hidden">備品の利用者・期間・状態・返却日時・操作</caption><thead><tr><th scope="col">備品名</th><th scope="col">借りる人</th><th scope="col">利用開始日</th><th scope="col">返却予定日</th><th scope="col">状態</th><th id="returned-at-heading" scope="col">返却日時</th><th id="action-heading" scope="col">操作</th></tr></thead><tbody id="item-list"></tbody></table>
+      </div>
+      </div>
+      <details id="cancelled-history" class="cancelled-history" hidden>
+        <summary>取消した予約の履歴 <span id="count-cancelled" class="count">0件</span></summary>
+        <div class="table-container"><table class="cancellation-table"><caption class="visually-hidden">取消済みの予約の備品・利用者・期間・取消日時</caption><thead><tr><th scope="col">備品名</th><th scope="col">借りる人</th><th scope="col">利用開始日</th><th scope="col">返却予定日</th><th scope="col">取消日時</th></tr></thead><tbody id="cancelled-list"></tbody></table></div>
+      </details>
+    </section>
+    <section id="equipment-section" class="panel equipment-panel" aria-labelledby="equipment-title">
+      <h2 id="equipment-title">備品名の登録</h2>
+      <p class="section-description">登録した備品を予約ページで選択できます。複数台ある場合は「PC-01」「PC-02」のように名前を分けてください。</p>
+      <form id="equipment-form" class="equipment-form" novalidate>
+        <div class="field"><label for="equipment-name">備品名 <span class="required">必須</span></label><input id="equipment-name" name="equipmentName" required maxlength="100" placeholder="例：ノートPC-01" aria-describedby="equipment-error"><p id="equipment-error" class="field-error" hidden></p></div>
+        <button id="equipment-register-button" class="button button-primary" type="submit">備品を登録する</button>
+      </form>
+      <p id="equipment-empty" class="section-description">備品はまだ登録されていません。</p>
+      <ul id="equipment-list" class="equipment-list" aria-label="登録済みの備品"></ul>
+    </section>
+    <footer>データはこのブラウザに保存されます。別の端末・ブラウザとは共有されません。</footer>
+    <noscript><p class="message message-error">このアプリを利用するには JavaScript を有効にしてください。</p></noscript>
+  </main>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>予約 | 備品貸出管理</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script defer src="js/constants.js"></script>
+  <script defer src="js/utils/dates.js"></script>
+  <script defer src="js/utils/validation.js"></script>
+  <script defer src="js/models/item.js"></script>
+  <script defer src="js/models/loanRules.js"></script>
+  <script defer src="js/services/storage.js"></script>
+  <script defer src="js/repositories/loanData.js"></script>
+  <script defer src="js/repositories/equipmentRepository.js"></script>
+  <script defer src="js/repositories/itemRepository.js"></script>
+  <script defer src="js/ui/messages.js"></script>
+  <script defer src="js/ui/form.js"></script>
+  <script defer src="js/ui/calendar.js"></script>
+  <script defer src="js/reservation.js"></script>
+</head>
+<body>
+  <header class="page-header"><div class="header-inner"><span class="app-mark" aria-hidden="true">備</span><h1>備品貸出管理</h1></div></header>
+  <main class="reservation-main">
+    <a class="back-link" href="index.html">← 一覧に戻る</a>
+    <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+    <section class="panel registration" aria-labelledby="registration-title">
+      <h2 id="registration-title">予約・貸出の登録</h2>
+      <p class="section-description">登録済みの備品と利用する期間を選んでください。</p>
+      <form id="loan-form" novalidate>
+        <div class="field"><label for="registration-type">登録種別</label><select id="registration-type" name="status" aria-describedby="registration-type-error"><option value="reserved">予約する</option><option value="borrowed">今から借りる</option></select><p class="field-error" id="registration-type-error" hidden></p></div>
+        <div class="field"><label for="item-name">備品 <span class="required">必須</span></label><select id="item-name" name="equipmentId" required aria-describedby="item-name-error"></select><p class="field-error" id="item-name-error" hidden></p><a class="form-note" href="index.html#equipment-section">備品名の登録は一覧ページから</a></div>
+        <div class="field"><label for="borrower-name">借りる人 <span class="required">必須</span></label><input id="borrower-name" name="borrowerName" required autocomplete="name" placeholder="例：山田 太郎" aria-describedby="borrower-name-error"><p class="field-error" id="borrower-name-error" hidden></p></div>
+        <div class="field"><label for="start-date">利用開始日 <span class="required">必須</span></label><div class="date-field"><input id="start-date" name="startDate" type="date" required aria-describedby="start-date-error"><button class="button calendar-open" type="button" data-calendar-for="start-date" aria-label="利用開始日をカレンダーで選ぶ">カレンダー</button></div><p class="field-error" id="start-date-error" hidden></p></div>
+        <div class="field"><label for="due-date">返却予定日 <span class="required">必須</span></label><div class="date-field"><input id="due-date" name="dueDate" type="date" required aria-describedby="due-date-error return-rule"><button class="button calendar-open" type="button" data-calendar-for="due-date" aria-label="返却予定日をカレンダーで選ぶ">カレンダー</button></div><p class="field-error" id="due-date-error" hidden></p><p id="return-rule" class="form-note">基本は当日返却です。翌朝10時までは期限超過の警告を出しません。</p></div>
+        <button id="register-button" class="button button-primary" type="submit">予約を登録する</button>
+        <p class="form-note">日付は直接入力またはカレンダーで指定できます。過去日・期間が重なる申請はできません。完了すると一覧に戻ります。</p>
+      </form>
+    </section>
+    <dialog id="calendar-dialog" aria-labelledby="calendar-title">
+      <div class="calendar-titlebar"><h2 id="calendar-title">日付を選択</h2><button id="calendar-close" class="button" type="button" aria-label="カレンダーを閉じる">閉じる</button></div>
+      <div class="calendar-navigation"><button id="calendar-previous" class="button" type="button" aria-label="前の月">‹</button><span id="calendar-month" aria-live="polite"></span><button id="calendar-next" class="button" type="button" aria-label="次の月">›</button></div>
+      <div class="calendar-weekdays" aria-hidden="true"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+      <div id="calendar-days" class="calendar-days" aria-label="日付を選択"></div>
+      <p class="form-note">過去の日付は選択できません。</p>
+    </dialog>
+    <footer>データはこのブラウザに保存されます。</footer>
+    <noscript><p class="message message-error">このアプリを利用するには JavaScript を有効にしてください。</p></noscript>
+  </main>
+</body>
+</html>

@@ -5,6 +5,7 @@
     const type = form.elements.status;
     const start = form.elements.startDate;
     const due = form.elements.dueDate;
+    const picker = app.createEquipmentPicker(form.elements.equipmentId);
     let previousStart = "";
     let editing = false;
     function syncDates() {
@@ -31,28 +32,20 @@
     return {
       reset,
       read: () => ({
-        ...Object.fromEntries(["equipmentId", "borrowerName", "status", "startDate", "dueDate"].map((field) => [field, form.elements[field].value])),
-        itemName: form.elements.equipmentId.value ? form.elements.equipmentId.selectedOptions[0].textContent : "",
+        ...Object.fromEntries(["borrowerName", "status", "startDate", "dueDate"].map((field) => [field, form.elements[field].value])),
+        equipmentId: picker.getSelected()[0]?.id || "",
+        itemName: picker.getSelected()[0]?.name || "",
       }),
-      setEquipment(equipment) {
-        const select = form.elements.equipmentId;
-        const options = equipment.map((item) => {
-          const option = document.createElement("option");
-          option.value = item.id;
-          option.textContent = item.name;
-          return option;
-        });
-        const placeholder = document.createElement("option");
-        placeholder.value = "";
-        placeholder.textContent = equipment.length ? "備品を選択してください" : "一覧ページで備品を登録してください";
-        select.replaceChildren(placeholder, ...options);
-        select.disabled = equipment.length === 0;
+      readAll() {
+        const common = this.read();
+        return picker.getSelected().map((item) => ({ ...common, equipmentId: item.id, itemName: item.name }));
       },
+      setEquipment: picker.setEquipment,
       edit(item) {
         editing = true;
         type.value = app.ITEM_STATUS.RESERVED;
         type.disabled = true;
-        form.elements.equipmentId.value = item.equipmentId;
+        picker.edit(item);
         form.elements.borrowerName.value = item.borrowerName;
         start.value = item.startDate;
         due.value = item.dueDate;

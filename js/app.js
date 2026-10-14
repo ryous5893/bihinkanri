@@ -9,13 +9,12 @@
   const button = document.getElementById("equipment-register-button");
   let busy = false;
   let readable = false;
-  let currentItems = [];
-  const tabs = app.createStatusTabs((status) => app.renderItemList(currentItems, new Date(), status));
+  let tabs;
+  const controls = app.createListControls({ repository, equipmentRepository, refresh, run: performOperation, ready: () => readable && !busy, tabs: () => tabs });
+  tabs = app.createStatusTabs(() => { controls.clearSelection(); controls.render(); });
   async function refresh() {
     const [items, equipment] = await Promise.all([repository.getAllItems(), equipmentRepository.getAllEquipment()]);
-    currentItems = items;
-    app.renderItemList(items, new Date(), tabs.getSelected());
-    app.renderEquipment(equipment);
+    controls.update(items, equipment);
   }
   async function initialize() {
     button.disabled = true;
@@ -26,12 +25,13 @@
       const messages = { reserved: "予約を登録しました。", borrowed: "貸出を登録しました。", edited: "予約の変更を保存しました。" };
       if (messages[result]) app.showMessage(messages[result]);
     } catch (error) { app.showMessage(error.message, "error"); }
-    finally { button.disabled = !readable; }
+    finally { button.disabled = !readable; controls.sync(); }
   }
   async function performOperation(action) {
     if (busy || !readable) return;
     busy = true;
     button.disabled = true;
+    controls.sync();
     const buttons = Array.from(document.querySelectorAll("[data-action]"), (element) => ({ element, disabled: element.disabled }));
     buttons.forEach(({ element }) => { element.disabled = true; });
     try { await action(); }
@@ -40,6 +40,7 @@
       busy = false;
       button.disabled = !readable;
       buttons.forEach(({ element, disabled }) => { element.disabled = disabled; });
+      controls.sync();
     }
   }
   form.addEventListener("submit", (event) => {

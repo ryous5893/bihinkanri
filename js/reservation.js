@@ -36,8 +36,9 @@
     if (!result.valid) { app.showMessage("入力内容を確認してください。", "error"); return; }
     busy = true;
     button.disabled = true;
-    const save = editingId ? repository.editReservation(editingId, loanForm.read()) : repository.addItem(loanForm.read());
-    void save.then((item) => {
+    const save = editingId ? repository.editReservation(editingId, loanForm.read()) : repository.addItems(loanForm.readAll());
+    void save.then((saved) => {
+      const item = editingId ? saved : saved[0];
       const result = editingId ? "edited" : item.status === app.ITEM_STATUS.RESERVED ? "reserved" : "borrowed";
       window.location.assign(`index.html?result=${result}`);
     }).catch((error) => {

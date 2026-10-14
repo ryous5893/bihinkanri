@@ -22,10 +22,11 @@
     borrowed: { label: "貸出中", description: "期限超過を先頭に、返却予定日の近い順に表示します。翌朝10時までは猶予があります。", empty: "予約中の備品で「貸出する」を押すと、ここに表示されます。" },
     returned: { label: "返却済", description: "返却した日時が新しい順に表示します。", empty: "備品を返却すると、返却日時と一緒にここに記録されます。" },
   };
-  app.renderItemList = (items, now = new Date(), status = app.ITEM_STATUS.RESERVED) => {
+  app.renderItemList = (items, now = new Date(), status = app.ITEM_STATUS.RESERVED, query = "", selected = new Set()) => {
     const today = app.toLocalDate(now);
     const rows = document.createDocumentFragment();
-    const ordered = items.filter((item) => item.status === status).sort((left, right) => {
+    const matching = items.filter((item) => app.matchesSearch(query, item.itemName, item.borrowerName));
+    const ordered = matching.filter((item) => item.status === status).sort((left, right) => {
       if (status === app.ITEM_STATUS.RETURNED) return Date.parse(right.returnedAt) - Date.parse(left.returnedAt);
       const overdueOrder = Number(app.isOverdue(right, now)) - Number(app.isOverdue(left, now));
       if (overdueOrder) return overdueOrder;
@@ -43,7 +44,18 @@
         note.textContent = `${app.daysBetween(item.dueDate, today)}日超過・未返却`;
         dueCell.append(note);
       }
-      row.append(cell(item.itemName), cell(item.borrowerName), cell(app.formatDate(item.startDate)), dueCell);
+      const nameCell = cell(item.itemName);
+      if (status === app.ITEM_STATUS.RESERVED) {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "reservation-checkbox";
+        checkbox.dataset.reservationId = item.id;
+        checkbox.setAttribute("aria-label", `${item.itemName}（${item.borrowerName}）をまとめて貸出の対象にする`);
+        checkbox.disabled = Boolean(app.reservationAvailability(item, items, today));
+        checkbox.checked = selected.has(item.id);
+        nameCell.prepend(checkbox);
+      }
+      row.append(nameCell, cell(item.borrowerName), cell(app.formatDate(item.startDate)), dueCell);
       const statusCell = cell("");
       const badge = document.createElement("span");
       badge.className = `status-badge status-${overdue ? "overdue" : item.status}`;
@@ -78,12 +90,13 @@
     document.getElementById("empty-state").hidden = ordered.length !== 0;
     document.getElementById("table-container").hidden = ordered.length === 0;
     document.getElementById("item-count").textContent = `${ordered.length}件`;
-    for (const state of Object.keys(views)) document.getElementById(`count-${state}`).textContent = String(items.filter((item) => item.status === state).length);
+    for (const state of Object.keys(views)) document.getElementById(`count-${state}`).textContent = String(matching.filter((item) => item.status === state).length);
     const view = views[status];
     document.getElementById("list-title").textContent = `${view.label}の備品`;
     document.getElementById("list-description").textContent = view.description;
-    document.getElementById("empty-title").textContent = `${view.label}の備品はありません`;
-    document.getElementById("empty-description").textContent = view.empty;
+    document.getElementById("empty-title").textContent = query.trim() ? "検索条件に一致する備品はありません" : `${view.label}の備品はありません`;
+    document.getElementById("empty-description").textContent = query.trim() ? "検索語を変更するか、クリアして確認してください。ほかの状態タブも確認できます。" : view.empty;
+    document.getElementById("batch-loan-toolbar").hidden = status !== app.ITEM_STATUS.RESERVED;
     document.getElementById("loan-table").dataset.status = status;
     document.getElementById("returned-at-heading").hidden = status !== app.ITEM_STATUS.RETURNED;
     document.getElementById("action-heading").hidden = status === app.ITEM_STATUS.RETURNED;
@@ -91,7 +104,7 @@
     const summary = document.getElementById("overdue-summary");
     summary.hidden = overdueCount === 0;
     summary.textContent = `返却期限を過ぎた貸出が${overdueCount}件あります。「貸出中」タブで利用者に返却を確認してください。`;
-    const cancelled = items.filter((item) => item.status === app.ITEM_STATUS.CANCELLED).sort((left, right) => Date.parse(right.cancelledAt) - Date.parse(left.cancelledAt));
+    const cancelled = matching.filter((item) => item.status === app.ITEM_STATUS.CANCELLED).sort((left, right) => Date.parse(right.cancelledAt) - Date.parse(left.cancelledAt));
     document.getElementById("cancelled-history").hidden = cancelled.length === 0;
     document.getElementById("count-cancelled").textContent = `${cancelled.length}件`;
     document.getElementById("cancelled-list").replaceChildren(...cancelled.map((item) => {
@@ -100,14 +113,22 @@
       return row;
     }));
   };
-  app.renderEquipment = (equipment) => {
+  app.renderEquipment = (equipment, items = [], query = "") => {
     const list = document.getElementById("equipment-list");
-    const names = equipment.map((item) => {
+    const matches = equipment.filter((entry) => app.matchesSearch(query, entry.name, ...items.filter((item) => item.equipmentId === entry.id && item.status === app.ITEM_STATUS.BORROWED).map((item) => item.borrowerName)));
+    const names = matches.map((item) => {
       const entry = document.createElement("li");
-      entry.textContent = item.name;
+      const borrowers = items.filter((record) => record.equipmentId === item.id && record.status === app.ITEM_STATUS.BORROWED);
+      const name = document.createElement("strong");
+      name.textContent = item.name;
+      const state = document.createElement("span");
+      state.textContent = borrowers.length ? `貸出中：${borrowers.map((record) => record.borrowerName).join("、")}` : "現在の貸出なし";
+      entry.className = borrowers.length ? "catalog-borrowed" : "catalog-available";
+      entry.append(name, state);
       return entry;
     });
     list.replaceChildren(...names);
-    document.getElementById("equipment-empty").hidden = equipment.length !== 0;
+    document.getElementById("equipment-empty").hidden = matches.length !== 0;
+    document.getElementById("equipment-empty").textContent = equipment.length ? "検索条件に一致する登録備品はありません。" : "備品はまだ登録されていません。";
   };
 })();

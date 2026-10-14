@@ -19,18 +19,25 @@
       if (new Set(items.map((item) => item.name)).size !== items.length) throw new Error("備品名が複数の管理IDに登録されています。保存データを確認してください。");
       return items;
     }
-    return {
-      async getAllEquipment() { return readEquipment(); },
-      async addEquipment(value) {
+    function addEquipmentBatch(values) {
+      if (!Array.isArray(values) || !values.length) throw new Error("備品名を1行に1件入力してください。");
+      const equipment = readEquipment();
+      const names = new Set(equipment.map((item) => item.name));
+      const added = values.map((value, index) => {
         const name = typeof value === "string" ? value.trim() : "";
         if (!name) throw new Error("備品名を入力してください。");
-        if (name.length > app.MAX_INPUT_LENGTH) throw new Error(`備品名は${app.MAX_INPUT_LENGTH}文字以内で入力してください。`);
-        const equipment = readEquipment();
-        if (equipment.some((item) => item.name === name)) throw new Error("この備品名はすでに登録されています。複数台ある場合は名前を分けてください。");
-        const item = { id: app.createId(), name, createdAt: now().toISOString() };
-        storage.save(app.EQUIPMENT_STORAGE_KEY, [...equipment, item]);
-        return item;
-      },
+        if (name.length > app.MAX_INPUT_LENGTH) throw new Error(`備品名は${app.MAX_INPUT_LENGTH}文字以内で入力してください。（${index + 1}件目）`);
+        if (names.has(name)) throw new Error(`${name}はすでに登録されています、または入力内で重複しています。複数台ある場合は名前を分けてください。`);
+        names.add(name);
+        return { id: app.createId(), name, createdAt: now().toISOString() };
+      });
+      storage.save(app.EQUIPMENT_STORAGE_KEY, [...equipment, ...added]);
+      return added;
+    }
+    return {
+      async getAllEquipment() { return readEquipment(); },
+      async addEquipment(value) { return addEquipmentBatch([value])[0]; },
+      async addEquipmentBatch(values) { return addEquipmentBatch(values); },
     };
   };
 })();

@@ -111,3 +111,71 @@ dialog::backdrop { background: #22354a70; }
 @media (max-width: 720px) { .page-toolbar { align-items: stretch; flex-direction: column; } .equipment-form { flex-direction: column; } .equipment-form .field { width: 100%; } .equipment-form .button { margin-top: 0; } }
 @media (max-width: 900px) { .workspace { grid-template-columns: 280px minmax(0, 1fr); gap: 16px; } .registration, .list-heading { padding: 20px; } td, th { padding-left: 14px; padding-right: 14px; } }
 @media (max-width: 720px) { .workspace { grid-template-columns: 1fr; } main { padding: 22px 16px; } .header-inner { padding: 20px 16px; } h1 { font-size: 21px; } .intro { font-size: 13px; } .registration { padding: 24px; } .empty-state { padding: 36px 20px; } }
+/* 画面の役割、操作、情報のまとまりを明確にする。 */
+:root { --brand: #125e57; --ink: #1c3045; --muted: #516477; --line: #cdd8e3; }
+body { background: #eaf0f5; }
+.page-header { background: #19344b; color: #fff; border-bottom: 4px solid #39b29c; }
+.header-inner { flex-wrap: wrap; padding-top: 20px; padding-bottom: 20px; }
+.page-nav { display: flex; gap: 8px; margin-left: auto; }
+.page-nav a { color: #e0ebf5; padding: 10px 16px; border-radius: 7px; text-decoration: none; border: 1px solid #6d8498; }
+.page-nav a[aria-current="page"] { color: #18344a; background: #fff; border-color: #fff; font-weight: 700; }
+.page-nav a:hover { background: #31566e; color: #fff; }
+.panel { border-color: #c4d1dd; box-shadow: 0 4px 16px #19344b08; }
+.list-panel { border-top: 5px solid #2563a0; overflow: hidden; }
+.equipment-panel { border-top: 5px solid var(--brand); }
+.registration { border-top: 5px solid #2563a0; }
+.report-panel { margin-bottom: 24px; padding: 24px; }
+.report-heading { display: flex; justify-content: space-between; gap: 18px; align-items: center; }
+.button-secondary { background: #fff; color: #23465e; border: 1px solid #8da5b8; }
+.button-secondary:hover { background: #edf3f8; }
+.report-heading .button { white-space: nowrap; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+.summary-grid > div { padding: 12px 18px; background: #f0f4f8; border-left: 4px solid #637e96; border-radius: 6px; font-weight: 600; }
+.summary-grid > div:nth-child(2) { background: #edf3ff; border-color: #3469b8; }
+.summary-grid > div:nth-child(3) { background: #fff4dc; border-color: #ac7114; }
+.summary-grid > div:nth-child(4) { background: #e9f6ef; border-color: #237859; }
+.summary-grid strong { display: block; font-size: 28px; line-height: 1.4; }
+.search-toolbar { padding: 22px 26px; background: #f6f9fc; border-bottom: 1px solid var(--line); }
+.search-controls { display: flex; gap: 10px; }
+.search-controls input { flex: 1; min-width: 0; }
+.search-controls .button { white-space: nowrap; }
+.batch-toolbar { display: flex; gap: 16px; padding: 12px 26px; align-items: center; justify-content: space-between; background: #edf3ff; border-top: 1px solid #cfdbed; }
+.batch-toolbar label { margin: 0; font-size: 12px; }
+.batch-toolbar .button { width: auto; }
+input[type="checkbox"] { width: 19px; min-height: 19px; height: 19px; accent-color: var(--brand); vertical-align: middle; margin-right: 8px; }
+.reservation-checkbox { display: block; margin-bottom: 9px; }
+textarea { width: 100%; border: 1px solid #9fb1c1; border-radius: 7px; font: inherit; padding: 12px; resize: vertical; }
+textarea[aria-invalid="true"] { border-color: var(--danger); }
+.bulk-registration { margin-top: 26px; padding: 18px; border: 1px solid #b3cabe; border-radius: 8px; background: #f4faf7; }
+.bulk-registration summary { cursor: pointer; font-weight: 700; color: var(--brand); }
+.bulk-registration form { margin-top: 16px; }
+.bulk-registration .button { margin-top: 12px; }
+.catalog-title { margin-top: 26px; }
+.equipment-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.equipment-list li { display: flex; flex-direction: column; padding: 12px 16px; background: #f2f7f5; border: 1px solid #c6dbd3; border-left: 4px solid #397a60; }
+.equipment-list li.catalog-borrowed { background: #fff8e9; border-color: #e6c88c; border-left-color: #ad7014; }
+.equipment-list li span { margin-top: 4px; font-size: 12px; color: #465a6c; }
+.reservation-main { max-width: 800px; }
+.flow-guide { display: flex; gap: 12px; flex-wrap: wrap; padding: 14px 18px; margin-bottom: 24px; background: #dfe7ef; border-radius: 8px; color: #526579; font-size: 12px; }
+.flow-guide strong { color: #184c84; }
+.flow-guide span:not(:last-child)::after { content: " →"; }
+.selection-count { margin-bottom: 8px; font-weight: 700; color: var(--brand); }
+.selected-equipment { display: flex; flex-wrap: wrap; gap: 8px; }
+.selection-chip { background: #e5f3ee; color: #14594b; border: 1px solid #80b6a5; border-radius: 7px; padding: 8px 12px; font: inherit; cursor: pointer; overflow-wrap: anywhere; max-width: 100%; }
+.selection-chip:hover { background: #d3e9e0; }
+.submit-actions { display: flex; gap: 12px; align-items: center; padding-top: 22px; border-top: 2px solid var(--line); }
+.submit-actions > * { flex: 1; }
+th { background: #eaf0f6; color: #334e65; font-weight: 700; }
+@media (max-width: 720px) {
+  .page-nav { width: 100%; margin-left: 0; }
+  .page-nav a { flex: 1; text-align: center; padding: 8px; font-size: 12px; }
+  .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .report-heading, .batch-toolbar, .submit-actions { flex-direction: column; align-items: stretch; }
+  .report-panel, .search-toolbar { padding: 18px; }
+  .batch-toolbar { padding: 14px 18px; }
+  .submit-actions > * { flex: auto; }
+}
+.form-section { min-width: 0; margin: 0 0 26px; padding: 20px; border: 1px solid #c7d6e2; border-radius: 8px; background: #f8fafc; }
+.form-section legend { padding: 0 10px; color: #234e73; font-weight: 700; font-size: 15px; }
+.form-section .field:last-child { margin-bottom: 0; }
+@media (max-width: 720px) { .form-section { padding: 14px; } }

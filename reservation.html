@@ -15,25 +15,31 @@
   <script defer src="js/repositories/equipmentRepository.js"></script>
   <script defer src="js/repositories/itemRepository.js"></script>
   <script defer src="js/ui/messages.js"></script>
+  <script defer src="js/ui/equipmentPicker.js"></script>
   <script defer src="js/ui/form.js"></script>
   <script defer src="js/ui/calendar.js"></script>
   <script defer src="js/reservation.js"></script>
 </head>
 <body>
-  <header class="page-header"><div class="header-inner"><span class="app-mark" aria-hidden="true">備</span><h1>備品貸出管理</h1></div></header>
+  <header class="page-header"><div class="header-inner"><span class="app-mark" aria-hidden="true">備</span><h1>備品貸出管理</h1><nav class="page-nav" aria-label="メインナビゲーション"><a href="index.html">一覧・備品管理</a><a href="reservation.html" aria-current="page">予約・貸出の登録</a></nav></div></header>
   <main class="reservation-main">
-    <a class="back-link" href="index.html">← 一覧に戻る</a>
+    <a class="back-link" href="index.html">← 一覧・備品管理に戻る</a><div class="flow-guide"><span>1. 一覧・備品管理</span><strong aria-current="step">2. 予約・貸出を登録</strong><span>3. 完了後は一覧へ</span></div>
     <div id="message" class="message" role="status" aria-live="polite" hidden></div>
     <section class="panel registration" aria-labelledby="registration-title">
       <h2 id="registration-title">予約・貸出の登録</h2>
-      <p class="section-description">登録済みの備品と利用する期間を選んでください。</p>
+      <p class="section-description">同じ利用者・期間で複数の備品をまとめて登録できます。予約の編集は1件ずつ行います。</p>
       <form id="loan-form" novalidate>
+        <fieldset class="form-section"><legend>1. 登録方法と備品</legend>
         <div class="field"><label for="registration-type">登録種別</label><select id="registration-type" name="status" aria-describedby="registration-type-error"><option value="reserved">予約する</option><option value="borrowed">今から借りる</option></select><p class="field-error" id="registration-type-error" hidden></p></div>
-        <div class="field"><label for="item-name">備品 <span class="required">必須</span></label><select id="item-name" name="equipmentId" required aria-describedby="item-name-error"></select><p class="field-error" id="item-name-error" hidden></p><a class="form-note" href="index.html#equipment-section">備品名の登録は一覧ページから</a></div>
+        <div class="field"><label for="reservation-search">備品名を検索</label><input id="reservation-search" type="search" placeholder="例：PC、ケーブル"><p class="form-note">名前で絞り込み、下の選択欄から追加してください。</p></div>
+        <div class="field"><label for="item-name">備品 <span class="required">必須</span></label><select id="item-name" name="equipmentId" required aria-describedby="item-name-error"></select><p class="field-error" id="item-name-error" hidden></p><p id="selection-count" class="selection-count" aria-live="polite">0件選択中</p><div id="selected-equipment" class="selected-equipment" aria-label="選択した備品"></div><p class="form-note">備品を選ぶたびに追加します。選択を外す場合は備品名の × を押してください。</p><a class="form-note" href="index.html#equipment-section">備品名の登録は一覧ページから</a></div>
+        </fieldset>
+        <fieldset class="form-section"><legend>2. 利用者と期間</legend>
         <div class="field"><label for="borrower-name">借りる人 <span class="required">必須</span></label><input id="borrower-name" name="borrowerName" required autocomplete="name" placeholder="例：山田 太郎" aria-describedby="borrower-name-error"><p class="field-error" id="borrower-name-error" hidden></p></div>
         <div class="field"><label for="start-date">利用開始日 <span class="required">必須</span></label><div class="date-field"><input id="start-date" name="startDate" type="date" required aria-describedby="start-date-error"><button class="button calendar-open" type="button" data-calendar-for="start-date" aria-label="利用開始日をカレンダーで選ぶ">カレンダー</button></div><p class="field-error" id="start-date-error" hidden></p></div>
         <div class="field"><label for="due-date">返却予定日 <span class="required">必須</span></label><div class="date-field"><input id="due-date" name="dueDate" type="date" required aria-describedby="due-date-error return-rule"><button class="button calendar-open" type="button" data-calendar-for="due-date" aria-label="返却予定日をカレンダーで選ぶ">カレンダー</button></div><p class="field-error" id="due-date-error" hidden></p><p id="return-rule" class="form-note">基本は当日返却です。翌朝10時までは期限超過の警告を出しません。</p></div>
-        <button id="register-button" class="button button-primary" type="submit">予約を登録する</button>
+        </fieldset>
+        <div class="submit-actions"><a class="button button-secondary" href="index.html">登録せず一覧に戻る</a><button id="register-button" class="button button-primary" type="submit">予約を登録する</button></div>
         <p class="form-note">日付は直接入力またはカレンダーで指定できます。過去日・期間が重なる申請はできません。完了すると一覧に戻ります。</p>
       </form>
     </section>

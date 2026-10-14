@@ -14,18 +14,25 @@
   <script defer src="js/repositories/loanData.js"></script>
   <script defer src="js/repositories/equipmentRepository.js"></script>
   <script defer src="js/repositories/itemRepository.js"></script>
+  <script defer src="js/utils/report.js"></script>
   <script defer src="js/ui/render.js"></script>
   <script defer src="js/ui/tabs.js"></script>
   <script defer src="js/ui/messages.js"></script>
+  <script defer src="js/ui/listControls.js"></script>
   <script defer src="js/app.js"></script>
 </head>
 <body>
-  <header class="page-header"><div class="header-inner"><span class="app-mark" aria-hidden="true">備</span><h1>備品貸出管理</h1></div></header>
+  <header class="page-header"><div class="header-inner"><span class="app-mark" aria-hidden="true">備</span><h1>備品貸出管理</h1><nav class="page-nav" aria-label="メインナビゲーション"><a href="index.html" aria-current="page">一覧・備品管理</a><a href="reservation.html">予約・貸出の登録</a></nav></div></header>
   <main>
-    <div class="page-toolbar"><p class="intro">予約・貸出・返却の状況を確認できます。</p><a id="new-reservation" class="button button-primary" href="reservation.html">予約・貸出を登録する</a></div>
+    <div class="page-toolbar"><div><p class="eyebrow">備品の利用状況</p><h2>一覧・備品管理</h2><p class="section-description">誰が借りているかの確認と、貸出・返却の操作はこちら。</p></div><a id="new-reservation" class="button button-primary" href="reservation.html">予約・貸出を登録する</a></div>
     <div id="message" class="message" role="status" aria-live="polite" hidden></div>
     <div id="overdue-summary" class="message message-error" role="status" hidden></div>
+    <section class="panel report-panel" aria-labelledby="report-title">
+      <div class="report-heading"><div><h2 id="report-title">利用統計</h2><p class="section-description">全期間・全備品の集計です。CSVは検索条件に関係なく、備品ごとの件数を出力します。</p></div><button id="export-csv" class="button button-secondary" type="button" disabled>統計CSVを出力</button></div>
+      <div class="summary-grid"><div>登録備品<strong id="stat-equipment">0</strong></div><div>予約中<strong id="stat-reserved">0</strong></div><div>貸出中<strong id="stat-borrowed">0</strong></div><div>返却済<strong id="stat-returned">0</strong></div></div>
+    </section>
     <section class="panel list-panel" aria-labelledby="list-title">
+      <div class="search-toolbar"><label for="list-search">備品・利用者を検索</label><div class="search-controls"><input id="list-search" type="search" placeholder="備品名や借りている人の名前" aria-describedby="search-help"><button id="clear-search" class="button button-secondary" type="button">クリア</button></div><p id="search-help" class="form-note">状態タブごとに絞り込みます。貸出中の利用者は「貸出中」タブで確認できます。</p></div>
       <div class="status-tabs" role="tablist" aria-label="貸出・予約の状況">
         <button id="tab-reserved" class="status-tab" type="button" role="tab" data-status="reserved" aria-controls="loan-panel" aria-selected="true">予約中 <span id="count-reserved" class="tab-count">0</span></button>
         <button id="tab-borrowed" class="status-tab" type="button" role="tab" data-status="borrowed" aria-controls="loan-panel" aria-selected="false" tabindex="-1">貸出中 <span id="count-borrowed" class="tab-count">0</span></button>
@@ -33,6 +40,7 @@
       </div>
       <div id="loan-panel" role="tabpanel" aria-labelledby="tab-reserved" tabindex="0">
       <div class="list-heading"><div><h2 id="list-title">予約中の備品</h2><p id="list-description" class="section-description">利用開始日の近い予約から表示します。</p></div><span id="item-count" class="count">0件</span></div>
+      <div id="batch-loan-toolbar" class="batch-toolbar"><label><input id="select-all-reservations" type="checkbox"> 表示中の貸出可能な予約をすべて選択</label><button id="start-selected" class="button button-primary" type="button" disabled>選択した予約をまとめて貸出（0件）</button></div>
       <div id="empty-state" class="empty-state"><div class="empty-icon" aria-hidden="true">□</div><h3 id="empty-title">予約中の備品はありません</h3><p id="empty-description">「予約・貸出を登録する」から新しい予約を登録できます。</p></div>
       <div id="table-container" class="table-container" hidden>
         <table id="loan-table" class="list-table"><caption class="visually-hidden">備品の利用者・期間・状態・返却日時・操作</caption><thead><tr><th scope="col">備品名</th><th scope="col">借りる人</th><th scope="col">利用開始日</th><th scope="col">返却予定日</th><th scope="col">状態</th><th id="returned-at-heading" scope="col">返却日時</th><th id="action-heading" scope="col">操作</th></tr></thead><tbody id="item-list"></tbody></table>
@@ -50,6 +58,8 @@
         <div class="field"><label for="equipment-name">備品名 <span class="required">必須</span></label><input id="equipment-name" name="equipmentName" required maxlength="100" placeholder="例：ノートPC-01" aria-describedby="equipment-error"><p id="equipment-error" class="field-error" hidden></p></div>
         <button id="equipment-register-button" class="button button-primary" type="submit">備品を登録する</button>
       </form>
+      <details class="bulk-registration"><summary>備品を一括登録する</summary><p class="section-description" id="bulk-help">Excelなどから備品名を1行に1件貼り付けてください。空行は無視します。重複・入力エラーがあれば全件の登録を中止します。</p><form id="bulk-equipment-form" novalidate><label for="bulk-equipment-names">備品名の一覧</label><textarea id="bulk-equipment-names" rows="5" placeholder="ノートPC-01&#10;ノートPC-02&#10;HDMIケーブル-01" aria-describedby="bulk-help bulk-equipment-error"></textarea><p id="bulk-equipment-error" class="field-error" hidden></p><button id="bulk-register-button" class="button button-secondary" type="submit" disabled>まとめて備品を登録する</button></form></details>
+      <h3 class="catalog-title">登録済みの備品と現在の利用者</h3><p class="form-note">上の検索欄で、この備品一覧も絞り込めます。</p>
       <p id="equipment-empty" class="section-description">備品はまだ登録されていません。</p>
       <ul id="equipment-list" class="equipment-list" aria-label="登録済みの備品"></ul>
     </section>
